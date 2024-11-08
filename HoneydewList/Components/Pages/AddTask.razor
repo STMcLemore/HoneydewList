@@ -1,0 +1,27 @@
+﻿@page "/add-task"
+@using Microsoft.AspNetCore.Components.Forms
+@inject HttpClient Http
+
+<h3>Add New Task</h3>
+
+<EditForm Model="newTask" OnValidSubmit="HandleValidSubmit">
+    <InputText @bind-Value="newTask.Title" placeholder="Title" />
+    <InputTextArea @bind-Value="newTask.Description" placeholder="Description" />
+    <InputSelect @bind-Value="newTask.Priority">
+        <option value="Low">Low</option>
+        <option value="Medium">Medium</option>
+        <option value="High">High</option>
+    </InputSelect>
+    <InputDate @bind-Value="newTask.DueDate" />
+    <button type="submit">Add Task</button>
+</EditForm>
+
+@code {
+    private TaskItem newTask = new TaskItem();
+
+    private async Task HandleValidSubmit()
+    {
+        await Http.PostAsJsonAsync("api/task", newTask);
+    }
+}
+

@@ -1,0 +1,59 @@
+﻿@page "/tasks"
+@inject IHttpClientFactory HttpClientFactory
+
+<h3>Tasks</h3>
+
+@if (tasks == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>Priority</th>
+                <th>DueDate</th>
+                <th>IsCompleted</th>
+                <th>Type</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var taskItem in tasks)
+            {
+                <tr>
+                    <td>@taskItem.Title</td>
+                    <td>@taskItem.Description</td>
+                    <td>@taskItem.Priority</td>
+                    <td>@taskItem.DueDate</td>
+                    <td>@taskItem.IsCompleted</td>
+                    <td>@taskItem.Type</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code 
+{
+    private HttpClient Http => HttpClientFactory.CreateClient("ApiClient");
+
+    private List<TaskItem> tasks = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        tasks = await Http.GetFromJsonAsync<List<TaskItem>>("api/task");
+    }
+
+    private async Task MarkComplete(int id)
+    {
+        var task = tasks.FirstOrDefault(t => t.Id == id);
+        if (task != null)
+        {
+            task.IsCompleted = true;
+            await Http.PutAsJsonAsync($"api/task/{id}", task);
+        }
+    }
+}
