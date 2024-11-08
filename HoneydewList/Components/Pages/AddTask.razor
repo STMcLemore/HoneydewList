@@ -5,23 +5,78 @@
 <h3>Add New Task</h3>
 
 <EditForm Model="newTask" OnValidSubmit="HandleValidSubmit">
-    <InputText @bind-Value="newTask.Title" placeholder="Title" />
-    <InputTextArea @bind-Value="newTask.Description" placeholder="Description" />
-    <InputSelect @bind-Value="newTask.Priority">
-        <option value="Low">Low</option>
-        <option value="Medium">Medium</option>
-        <option value="High">High</option>
-    </InputSelect>
-    <InputDate @bind-Value="newTask.DueDate" />
-    <button type="submit">Add Task</button>
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Title</label>
+        <InputText @bind-Value="newTask.Title" placeholder="Enter Title" class="form-control" />
+        <ValidationMessage For="() => newTask.Title" />
+    </div>
+
+    <div>
+        <label>Description</label>
+        <InputTextArea @bind-Value="newTask.Description" placeholder="Enter Description" class="form-control" />
+        <ValidationMessage For="() => newTask.Description" />
+    </div>
+
+    <div>
+        <label>Priority</label>
+        <InputSelect @bind-Value="newTask.Priority" class="form-control">
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+        </InputSelect>
+        <ValidationMessage For="() => newTask.Priority" />
+    </div>
+
+    <div>
+        <label>Due Date</label>
+        <InputDate @bind-Value="newTask.DueDate" class="form-control" />
+        <ValidationMessage For="() => newTask.DueDate" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Add Task</button>
 </EditForm>
+
+@if (isSuccess)
+{
+    <div class="alert alert-success mt-3">Task added successfully!</div>
+}
+@if (isError)
+{
+    <div class="alert alert-danger mt-3">An error occurred while adding the task.</div>
+}
 
 @code {
     private TaskItem newTask = new TaskItem();
+    private bool isSuccess = false;
+    private bool isError = false;
 
     private async Task HandleValidSubmit()
     {
-        await Http.PostAsJsonAsync("api/task", newTask);
+        try
+        {
+            Console.WriteLine("Submitting form...");
+            var response = await Http.PostAsJsonAsync("api/task", newTask);
+            if (response.IsSuccessStatusCode)
+            {
+                isSuccess = true;
+                isError = false;
+                newTask = new TaskItem(); // Clear form on success
+            }
+            else
+            {
+                isSuccess = false;
+                isError = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            isSuccess = false;
+            isError = true;
+            Console.WriteLine($"Error: {ex.Message}");
+        }
     }
 }
 
