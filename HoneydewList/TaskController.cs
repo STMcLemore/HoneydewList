@@ -26,6 +26,7 @@ namespace HoneydewList
         public async Task<ActionResult<TaskItem>> GetTask(int id)
         {
             var taskItem = await _context.TaskItems.FindAsync(id);
+
             if (taskItem == null)
             {
                 return NotFound();
@@ -34,11 +35,26 @@ namespace HoneydewList
         }
 
         [HttpPost]
-        public async Task<ActionResult<TaskItem>> PostTask(TaskItem taskItem)
+        public async Task<ActionResult<TaskItem>> PostTask([FromBody]TaskItem taskItem)
         {
-            _context.TaskItems.Add(taskItem);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetTask), new { id = taskItem.Id }, taskItem);
+            if (taskItem == null)
+            {
+                return BadRequest("Data is missing");
+            }
+
+            Console.WriteLine($"Received Task - Title: {taskItem.Title}, Description: {taskItem.Description}, Priority: {taskItem.Priority}, DueDate: {taskItem.DueDate}");
+
+            try
+            {
+                _context.TaskItems.Add(taskItem);
+                await _context.SaveChangesAsync();
+                return CreatedAtAction("GetTask", new { id = taskItem.Id }, taskItem);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500);
+            }
         }
 
         [HttpPut("{id}")]

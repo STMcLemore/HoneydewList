@@ -12,11 +12,11 @@ else
     <table class="table">
         <thead>
             <tr>
+                <th>Id</th>
                 <th>Title</th>
                 <th>Description</th>
                 <th>Priority</th>
                 <th>DueDate</th>
-                <th>IsCompleted</th>
                 <th>Type</th>
             </tr>
         </thead>
@@ -24,12 +24,22 @@ else
             @foreach (var taskItem in tasks)
             {
                 <tr>
+                    <td>@taskItem.Id</td>
                     <td>@taskItem.Title</td>
                     <td>@taskItem.Description</td>
                     <td>@taskItem.Priority</td>
-                    <td>@taskItem.DueDate</td>
-                    <td>@taskItem.IsCompleted</td>
+                    <td>@taskItem.DueDate.ToString("yyy-MM-dd")</td>
                     <td>@taskItem.Type</td>
+                    <td>
+                        @if (taskItem.IsCompleted)
+                        {
+                            <span class="badge bg-success">Completed</span>
+                        }
+                        else
+                        {
+                            <button class="btn btn-sm btn-primary" @onclick="() => MarkComplete(taskItem.Id)">Mark Complete</button>
+                        }
+                    </td>
                 </tr>
             }
         </tbody>
@@ -54,6 +64,7 @@ else
         {
             task.IsCompleted = true;
             await Http.PutAsJsonAsync($"api/task/{id}", task);
+            StateHasChanged();
         }
     }
 }

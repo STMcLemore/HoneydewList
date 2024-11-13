@@ -20,7 +20,7 @@ namespace HoneydewList
             modelBuilder.Entity<TaskItem>().HasData(
                 new TaskItem 
                 { 
-                    Id = 1, 
+                    Id = 1,
                     Title = "Feed Cat", 
                     Description = "Give cat 1/4 cup of food in the morning", 
                     Priority = TaskPriority.High, 

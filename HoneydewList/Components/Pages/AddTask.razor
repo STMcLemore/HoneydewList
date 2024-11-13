@@ -1,39 +1,58 @@
 ﻿@page "/add-task"
 @using Microsoft.AspNetCore.Components.Forms
-@inject HttpClient Http
+@inject IHttpClientFactory HttpClientFactory
 
 <h3>Add New Task</h3>
 
-<EditForm Model="newTask" OnValidSubmit="HandleValidSubmit">
+<EditForm Model="@taskItem" OnValidSubmit="HandleValidSubmit" FormName="NewTask1">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <div>
-        <label>Title</label>
-        <InputText @bind-Value="newTask.Title" placeholder="Enter Title" class="form-control" />
-        <ValidationMessage For="() => newTask.Title" />
+    <div class="form-group row">
+        <label for="title" class="col-sm-3">Title: </label>
+        <InputText id="title" class="form-control col-sm-8" @bind-Value="@taskItem.Title" placeholder="Enter Title"></InputText>
+        <ValidationMessage For="() => taskItem.Title" />
     </div>
 
-    <div>
-        <label>Description</label>
-        <InputTextArea @bind-Value="newTask.Description" placeholder="Enter Description" class="form-control" />
-        <ValidationMessage For="() => newTask.Description" />
+    <div class="form-group row">
+        <label for="description" class="col-sm-3">Description: </label>
+        <InputTextArea id="description" class="form-control col-sm-8" @bind-Value="@taskItem.Description" placeholder="Enter Description"></InputTextArea>
+        <ValidationMessage For="() => taskItem.Description" />
     </div>
 
-    <div>
-        <label>Priority</label>
-        <InputSelect @bind-Value="newTask.Priority" class="form-control">
+    <div class="form-group row">
+        <label for="priority" class="col-sm-3">Priority: </label>
+        <InputSelect id="priority" class="form-control col-sm-8" @bind-Value="@taskItem.Priority" placeholder="Enter Priority">
             <option value="Low">Low</option>
             <option value="Medium">Medium</option>
             <option value="High">High</option>
         </InputSelect>
-        <ValidationMessage For="() => newTask.Priority" />
+        <ValidationMessage For="() => taskItem.Priority" />
     </div>
 
-    <div>
-        <label>Due Date</label>
-        <InputDate @bind-Value="newTask.DueDate" class="form-control" />
-        <ValidationMessage For="() => newTask.DueDate" />
+    <div class="form-group row">
+        <label for="dueDate" class="col-sm-3">Due Date: </label>
+        <InputDate id="DueDate" class="form-control col-sm-8" @bind-Value="@taskItem.DueDate"/>
+        <ValidationMessage For="() => taskItem.DueDate" />
+    </div>
+
+    <div class="form-group row">
+        <label for="type" class="col-sm-3">Task Type: </label>
+        <InputSelect id="type" class="form-control col-sm-8" @bind-Value="@taskItem.Type">
+            <option value="Daily">Daily</option>
+            <option value="Weekly">Weekly</option>
+            <option value="Monthly">Monthly</option>
+        </InputSelect>
+        <ValidationMessage For="() => taskItem.Type" />
+    </div>
+
+    <div class="form-group row">
+        <label for="isCompleted" class="col-sm-3">Is Completed: </label>
+        <InputSelect id="isCompleted" class="form-control col-sm-8" @bind-Value="@taskItem.IsCompleted">
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+        </InputSelect>
+        <ValidationMessage For="() => taskItem.IsCompleted" />
     </div>
 
     <button type="submit" class="btn btn-primary">Add Task</button>
@@ -49,7 +68,7 @@
 }
 
 @code {
-    private TaskItem newTask = new TaskItem();
+    TaskItem taskItem = new ();
     private bool isSuccess = false;
     private bool isError = false;
 
@@ -57,13 +76,17 @@
     {
         try
         {
-            Console.WriteLine("Submitting form...");
-            var response = await Http.PostAsJsonAsync("api/task", newTask);
+            Console.WriteLine($"New Task - Title: {taskItem.Title}, Description: {taskItem.Description}, Priority: {taskItem.Priority}, DueDate: {taskItem.DueDate}, Type: {taskItem.Type}");
+
+            var httpClient = HttpClientFactory.CreateClient("ApiClient");
+
+            var response = await httpClient.PostAsJsonAsync("https://localhost:7074/api/task", taskItem);
+
             if (response.IsSuccessStatusCode)
             {
                 isSuccess = true;
                 isError = false;
-                newTask = new TaskItem(); // Clear form on success
+                taskItem = new TaskItem();
             }
             else
             {
@@ -77,6 +100,8 @@
             isError = true;
             Console.WriteLine($"Error: {ex.Message}");
         }
+
+
     }
 }
 
